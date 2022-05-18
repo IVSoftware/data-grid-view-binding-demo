@@ -11,6 +11,11 @@ namespace dgv_ac
         {
             InitializeComponent();
         }
+
+        /// <summary>
+        /// Wait for the main form to be created, then attach 
+        /// your Binding List as the data source of the DGV
+        /// </summary>
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -20,10 +25,16 @@ namespace dgv_ac
         private void initDGV()
         {
             dataGridView1.AllowUserToAddRows = false;
+
+            // Now you can populate the DataGridView simply
+            // by adding some records to the list.
             for (int i = 0; i < 5; i++)
             {
                 DataSource.Add(new Record { Number = i, FileName = $"MyFile_{i}.txt" });
             }
+
+            // Once the first record is added, the Columns information is
+            // available and we can do column formatting.
             dataGridView1.Columns[nameof(Record.FileName)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
             var numberColumn = dataGridView1.Columns[nameof(Record.Number)];
@@ -94,7 +105,9 @@ namespace dgv_ac
         }
 
         public BindingList<Record> DataSource = new BindingList<Record>();
-    }
+        }
+        // This is the record class that will provide column 
+        // information to the DataGridView automatically.
     public class Record
     {
         public int Number { get; set; }
