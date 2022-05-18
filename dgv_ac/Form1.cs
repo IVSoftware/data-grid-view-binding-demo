@@ -25,9 +25,15 @@ namespace dgv_ac
                 DataSource.Add(new Record { Number = i, FileName = $"MyFile_{i}.txt" });
             }
             dataGridView1.Columns[nameof(Record.FileName)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+            var numberColumn = dataGridView1.Columns[nameof(Record.Number)];
+            numberColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            numberColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
             var checkboxColumn = dataGridView1.Columns[nameof(Record.IsChecked)];
             checkboxColumn.HeaderText = string.Empty;
             checkboxColumn.Width = 40;
+
             dataGridView1.CellClick += onCellClick;
             dataGridView1.CellContentClick += onCellContentClick;
         }
