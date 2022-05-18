@@ -33,8 +33,8 @@ namespace dgv_ac
                 DataSource.Add(new Record { Number = i, FileName = $"MyFile_{i}.txt" });
             }
 
-            // Once the first record is added, the Columns information is
-            // available and we can do column formatting.
+            // Once the first record is added, the Columns information
+            // is available and we can do column formatting.
             dataGridView1.Columns[nameof(Record.FileName)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
             var numberColumn = dataGridView1.Columns[nameof(Record.Number)];
@@ -79,7 +79,7 @@ namespace dgv_ac
                         {
                             if(DataSource.Count(record=>record.IsChecked) == DataSource.Count)
                             {
-                                // This block says thet're all chacked or all unchecked.
+                                // This block says thet're all checked or all unchecked.
                                 if(DataSource.First().IsChecked) // then they all are
                                 {
                                     setAll(false);
@@ -102,10 +102,10 @@ namespace dgv_ac
                 }
                 Refresh();
             }
-        }
+        }       
 
         public BindingList<Record> DataSource = new BindingList<Record>();
-        }
+    }
         // This is the record class that will provide column 
         // information to the DataGridView automatically.
     public class Record
