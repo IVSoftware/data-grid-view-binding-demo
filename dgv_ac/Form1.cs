@@ -60,6 +60,7 @@ namespace dgv_ac
             {
                 Width = 20,
                 Height = 20,
+                Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
             };
             dataGridView1.Controls.Add(headerPanel);
             headerPanel.ColumnCount = 3;
@@ -67,8 +68,8 @@ namespace dgv_ac
             headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             headerPanel.Controls.Add(checkBox, 1, 0);
+            headerPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             headerPanel.AutoSize = true;
-            checkBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         }
 
         // https://docs.microsoft.com/en-us/dotnet/desktop/winforms/controls/how-to-host-controls-in-windows-forms-datagridview-cells?view=netframeworkdesktop-4.8
@@ -83,7 +84,6 @@ namespace dgv_ac
                     case nameof(Record.IsChecked):
                         var headerCellLocation = dataGridView1.GetCellDisplayRectangle(e.ColumnIndex, -1, true);
                         headerPanel.Location = headerCellLocation.Location;
-                        headerPanel.BackColor = Color.Red;
                         headerPanel.Size = headerCellLocation.Size;
                         break;
                 }
