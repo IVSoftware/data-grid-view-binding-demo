@@ -48,28 +48,65 @@ namespace dgv_ac
             checkboxColumn.Width = 60;
             checkboxColumn.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
             attachPanel();
-
-            dataGridView1.CellClick += onCellClick;
             dataGridView1.CellContentClick += onCellContentClick;
             dataGridView1.CellPainting += onCellPainting;
+            Record.CheckBoxChanged += (sender, e) =>
+            {
+                if (DataSource.Any())   // Check to see if there are any records at all.
+                {
+                    var checkedCount = DataSource.Count(record => record.IsChecked);
+                    if(checkedCount == DataSource.Count)
+                    {
+                        // All checked
+                        _checkBox.CheckState = CheckState.Checked;
+                    }
+                    else if (checkedCount == 0)
+                    {
+                        _checkBox.CheckState = CheckState.Unchecked;
+                    }
+                    else _checkBox.CheckState = CheckState.Indeterminate;
+                }
+            };
         }
 
         private void attachPanel()
         {
-            var checkBox = new CheckBox()
+           _checkBox = new CheckBox()
             {
                 Width = 20,
                 Height = 20,
                 Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
+                AutoCheck = false,
             };
-            dataGridView1.Controls.Add(headerPanel);
-            headerPanel.ColumnCount = 3;
-            headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
-            headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
-            headerPanel.Controls.Add(checkBox, 1, 0);
-            headerPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            headerPanel.AutoSize = true;
+            _checkBox.Click += onCheckBoxClick;
+            dataGridView1.Controls.Add(_headerPanel);
+            _headerPanel.ColumnCount = 3;
+            _headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            _headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            _headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            _headerPanel.Controls.Add(_checkBox, 1, 0);
+            _headerPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            _headerPanel.AutoSize = true;
+        }
+
+        private void onCheckBoxClick(object sender, EventArgs e)
+        {
+            if (DataSource.Any())   // Check to see if there are any records at all.
+            {
+                if (DataSource.Count(record => record.IsChecked) == DataSource.Count)
+                {
+                    // This block says thet're all checked or all unchecked.
+                    if (DataSource.First().IsChecked) // then they all are
+                    {
+                        setAll(false);
+                    }
+                    else
+                    {
+                        setAll(true);
+                    }
+                }
+                else setAll(true); // If they're mixed, make them all checked.
+            }
         }
 
         // https://docs.microsoft.com/en-us/dotnet/desktop/winforms/controls/how-to-host-controls-in-windows-forms-datagridview-cells?view=netframeworkdesktop-4.8
@@ -83,15 +120,16 @@ namespace dgv_ac
                 {
                     case nameof(Record.IsChecked):
                         var headerCellLocation = dataGridView1.GetCellDisplayRectangle(e.ColumnIndex, -1, true);
-                        headerPanel.Location = headerCellLocation.Location;
-                        headerPanel.Size = headerCellLocation.Size;
+                        _headerPanel.Location = headerCellLocation.Location;
+                        _headerPanel.Size = headerCellLocation.Size;
                         break;
                 }
             }
         }
 
         // https://www.aspsnippets.com/Articles/Add-Check-all-CheckBox-in-Header-row-of-DataGridView-using-C-and-VBNet-in-Windows-Application.aspx
-        TableLayoutPanel headerPanel = new TableLayoutPanel();
+        TableLayoutPanel _headerPanel = new TableLayoutPanel();
+        CheckBox _checkBox;
 
         /// <summary>
         /// Detect check box click and end the edit mode in this case.
@@ -107,45 +145,14 @@ namespace dgv_ac
                 }
             }
         }
-
-
-        /// <summary>
-        /// Detect header click and set the records accordingly.
-        /// </summary>
-        private void onCellClick(object sender, DataGridViewCellEventArgs e)
+        private void setAll(bool value)
         {
-            if(e.RowIndex == -1)
+            foreach (var record in DataSource)
             {
-                switch (dataGridView1.Columns[e.ColumnIndex].Name)
-                {
-                    case nameof(Record.IsChecked):
-                        if (DataSource.Any())   // Check to see if there are any records at all.
-                        {
-                            if(DataSource.Count(record=>record.IsChecked) == DataSource.Count)
-                            {
-                                // This block says thet're all checked or all unchecked.
-                                if(DataSource.First().IsChecked) // then they all are
-                                {
-                                    setAll(false);
-                                }
-                                else
-                                {
-                                    setAll(true);
-                                }
-                            }
-                            else setAll(true); // If they're mixed, make them all checked.
-                        }
-                        break;
-                }
+                record.IsChecked = value;
             }
-            void setAll(bool value)
-            {
-                foreach (var record in DataSource)
-                {
-                    record.IsChecked = value;
-                }
-                Refresh();
-            }
+            BeginInvoke((MethodInvoker)delegate { _checkBox.Checked = value; });
+            Refresh();
         }       
 
         public BindingList<Record> DataSource = new BindingList<Record>();
@@ -155,7 +162,20 @@ namespace dgv_ac
     public class Record
     {
         public int Number { get; set; }
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked 
+        { 
+            get => _isChecked; 
+            set
+            {
+                if(_isChecked != value)
+                {
+                    _isChecked = value;
+                    CheckBoxChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        public static event EventHandler CheckBoxChanged;
         public string FileName { get; set; }
     }
 }
